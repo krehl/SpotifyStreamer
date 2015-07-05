@@ -38,12 +38,19 @@ public class MainActivity extends ActionBarActivity {
 
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString("Searchterm",mSearchField.getText().toString());
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         SpotifyApi api = new SpotifyApi();
         mArtists = (ListView) findViewById(R.id.artists);
         mSearchField = (EditText) findViewById(R.id.search_text);
+        mSearchField.setText(savedInstanceState.getString("Searchterm"));
         final SpotifyService spotify = api.getService();
 
         artistArrayAdapter = new ArtistsArrayAdapter(this,spotify);

@@ -8,6 +8,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
+import com.google.common.collect.ImmutableMap;
+
+import java.util.AbstractMap;
+import java.util.Map;
+import java.util.Objects;
+
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
@@ -16,6 +22,8 @@ import kaaes.spotify.webapi.android.models.Tracks;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
+import retrofit.http.Query;
+import retrofit.http.QueryMap;
 
 
 public class ArtistDetails extends ActionBarActivity {
@@ -33,7 +41,9 @@ public class ArtistDetails extends ActionBarActivity {
         mTracks.setAdapter(tracksArrayAdapter);
         Intent intent = getIntent();
         String artistID = intent.getStringExtra(ARTIST_ID);
-        spotifyService.getArtistTopTrack(artistID, new Callback<Tracks>() {
+
+
+        spotifyService.getArtistTopTrack(artistID, ImmutableMap.<String, Object>of("country", "de"), new Callback<Tracks>() {
             @Override
             public void success(Tracks tracks, Response response) {
                 tracksArrayAdapter.clear();
