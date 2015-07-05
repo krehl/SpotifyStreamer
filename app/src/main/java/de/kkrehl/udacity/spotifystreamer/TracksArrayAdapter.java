@@ -23,7 +23,7 @@ public class TracksArrayAdapter extends ArrayAdapter<Track> {
 
     private static SpotifyService spotify;
     Picasso picasso = Picasso.with(getContext());
-    final static Boolean INDICATORS = true;
+    final static Boolean INDICATORS = false;
 
     public TracksArrayAdapter(Context context, SpotifyService spotify) {
         super(context,R.layout.track_item,new ArrayList<Track>());
@@ -41,17 +41,17 @@ public class TracksArrayAdapter extends ArrayAdapter<Track> {
             v = vi.inflate(R.layout.track_item, null);
         }
 
-        TextView tvTrack = (TextView) v.findViewById(R.id.trackName);
+        TextView trackName = (TextView) v.findViewById(R.id.trackName);
         ImageView imageView = (ImageView) v.findViewById(R.id.trackImage);
-        TextView tvAlbum = (TextView) v.findViewById(R.id.trackAlbumName);
+        TextView trackAlbumName = (TextView) v.findViewById(R.id.trackAlbumName);
         Track track = getItem(position);
         if (track.album.images.size() != 0) {
             picasso.load(track.album.images.get(0).url).placeholder(R.drawable.artist_placeholder).fit().centerCrop().into(imageView);
         } else {
             imageView.setImageResource(R.drawable.artist_placeholder);
         }
-        tvTrack.setText(track.name);
-        tvAlbum.setText(track.album.name);
+        trackName.setText(track.name);
+        trackAlbumName.setText(track.album.name);
         return v;
     }
 }

@@ -1,6 +1,7 @@
 package de.kkrehl.udacity.spotifystreamer;
 
 import android.content.Intent;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.internal.widget.AdapterViewCompat;
@@ -15,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,13 +36,22 @@ public class MainActivity extends ActionBarActivity {
     ListView mArtists;
     EditText mSearchField;
     final static String ARTIST_ID = "artist_id";
+    final static String ARTIST_NAME = "artist_name";
+    final static String SEARCH_TERM = "SearchTerm";
+    final static String PREFERENCES = "preferences";
     static ArtistsArrayAdapter artistArrayAdapter;
 
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putString("Searchterm",mSearchField.getText().toString());
+        outState.putString(SEARCH_TERM, mSearchField.getText().toString());
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onPause() {
+        getSharedPreferences(PREFERENCES,0).edit().putString(SEARCH_TERM,mSearchField.getText().toString());
+        super.onPause();
     }
 
     @Override
@@ -50,7 +61,11 @@ public class MainActivity extends ActionBarActivity {
         SpotifyApi api = new SpotifyApi();
         mArtists = (ListView) findViewById(R.id.artists);
         mSearchField = (EditText) findViewById(R.id.search_text);
-        mSearchField.setText(savedInstanceState.getString("Searchterm"));
+        if (savedInstanceState != null) {
+            mSearchField.setText(savedInstanceState.getString(SEARCH_TERM));
+        } else {
+            mSearchField.setText(getSharedPreferences(PREFERENCES,0).getString(SEARCH_TERM,""));
+        }
         final SpotifyService spotify = api.getService();
 
         artistArrayAdapter = new ArtistsArrayAdapter(this,spotify);
@@ -67,6 +82,11 @@ public class MainActivity extends ActionBarActivity {
                 spotify.searchArtists(s.toString().concat("*"), new Callback<ArtistsPager>() {
                     @Override
                     public void success(ArtistsPager artistsPager, Response response) {
+                        if (artistsPager.artists.items.size()==0) {
+                            artistArrayAdapter.clear();
+                            Toast.makeText(getApplicationContext(),"No artists found.",Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         artistArrayAdapter.clear();
                         for (Artist artist : artistsPager.artists.items) {
                             artistArrayAdapter.add(artist);
@@ -75,7 +95,7 @@ public class MainActivity extends ActionBarActivity {
 
                     @Override
                     public void failure(RetrofitError error) {
-
+                        Toast.makeText(getApplicationContext(),"No artists found.",Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -89,7 +109,9 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(view.getContext(),ArtistDetails.class);
-                intent.putExtra(ARTIST_ID, artistArrayAdapter.getItem(position).id);
+                Artist artist = artistArrayAdapter.getItem(position);
+                intent.putExtra(ARTIST_ID, artist.id);
+                intent.putExtra(ARTIST_NAME, artist.name);
                 startActivity(intent);
             }
         });

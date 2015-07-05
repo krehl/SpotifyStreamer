@@ -25,7 +25,7 @@ public class ArtistsArrayAdapter extends ArrayAdapter<Artist> {
 
     private static SpotifyService spotify;
     Picasso picasso = Picasso.with(getContext());
-    final static Boolean INDICATORS = true;
+    final static Boolean INDICATORS = false;
 
     public ArtistsArrayAdapter(Context context, SpotifyService spotify) {
         super(context,R.layout.artist_item,new ArrayList<Artist>());
