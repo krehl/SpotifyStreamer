@@ -12,8 +12,6 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.Track;
 
 /**
@@ -21,37 +19,46 @@ import kaaes.spotify.webapi.android.models.Track;
  */
 public class TracksArrayAdapter extends ArrayAdapter<Track> {
 
-    private static SpotifyService spotify;
-    Picasso picasso = Picasso.with(getContext());
     final static Boolean INDICATORS = false;
+    Picasso picasso = Picasso.with(getContext());
 
-    public TracksArrayAdapter(Context context, SpotifyService spotify) {
+    public TracksArrayAdapter(Context context) {
         super(context,R.layout.track_item,new ArrayList<Track>());
-        this.spotify = spotify;
         picasso.setIndicatorsEnabled(INDICATORS);
     }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View v = convertView;
         Context context = getContext();
-
-        if (null == v) {
+        ViewHolder holder;
+        if (null == convertView) {
             LayoutInflater vi;
             vi = LayoutInflater.from(context);
-            v = vi.inflate(R.layout.track_item, null);
+            convertView = vi.inflate(R.layout.track_item, null);
+            holder = new ViewHolder();
+            holder.trackName = (TextView) convertView.findViewById(R.id.trackName);
+            holder.imageView = (ImageView) convertView.findViewById(R.id.trackImage);
+            holder.trackAlbumName = (TextView) convertView.findViewById(R.id.trackAlbumName);
+            convertView.setTag(holder);
+        } else {
+            holder = (ViewHolder) convertView.getTag();
         }
 
-        TextView trackName = (TextView) v.findViewById(R.id.trackName);
-        ImageView imageView = (ImageView) v.findViewById(R.id.trackImage);
-        TextView trackAlbumName = (TextView) v.findViewById(R.id.trackAlbumName);
+
         Track track = getItem(position);
-        if (track.album.images.size() != 0) {
-            picasso.load(track.album.images.get(0).url).placeholder(R.drawable.artist_placeholder).fit().centerCrop().into(imageView);
+        if (track.album.images.size() != 0 && track.album.images.get(0).url != null) {
+            picasso.load(track.album.images.get(0).url).placeholder(R.drawable.artist_placeholder).fit().centerCrop().into(holder.imageView);
         } else {
-            imageView.setImageResource(R.drawable.artist_placeholder);
+            holder.imageView.setImageResource(R.drawable.artist_placeholder);
         }
-        trackName.setText(track.name);
-        trackAlbumName.setText(track.album.name);
-        return v;
+        holder.trackName.setText(track.name);
+        holder.trackAlbumName.setText(track.album.name);
+        return convertView;
+    }
+
+    class ViewHolder {
+        TextView trackName;
+        ImageView imageView;
+        TextView trackAlbumName;
     }
 }

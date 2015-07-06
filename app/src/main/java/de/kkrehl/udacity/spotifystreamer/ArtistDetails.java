@@ -1,9 +1,9 @@
 package de.kkrehl.udacity.spotifystreamer;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,25 +12,16 @@ import android.widget.Toast;
 
 import com.google.common.collect.ImmutableMap;
 
-import java.util.AbstractMap;
-import java.util.Map;
-import java.util.Objects;
-
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
-import retrofit.http.Query;
-import retrofit.http.QueryMap;
 
 
 public class ArtistDetails extends ActionBarActivity {
-    final static String ARTIST_ID = "artist_id";
-    final static String ARTIST_NAME = "artist_name";
 
     ListView mTracks;
 
@@ -38,18 +29,25 @@ public class ArtistDetails extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist_details);
-
+        String artistName = "";
+        String artistID = "";
         Intent intent = getIntent();
-        String artistID = intent.getStringExtra(ARTIST_ID);
-        String artistName = intent.getStringExtra(ARTIST_NAME);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle("Top 10 Tracks");
-        actionBar.setSubtitle(artistName);
+        if (intent != null) {
+            artistID = intent.getStringExtra(MainActivity.ARTIST_ID);
+            artistName = intent.getStringExtra(MainActivity.ARTIST_NAME);
+        } else {
+            finish(); //Abort the activity if there is no intent
+        }
 
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle("Top 10 Tracks");
+            actionBar.setSubtitle(artistName);
+        }
         final SpotifyApi spotifyApi = new SpotifyApi();
         final SpotifyService spotifyService = spotifyApi.getService();
         mTracks = (ListView) findViewById(R.id.trackList);
-        final TracksArrayAdapter tracksArrayAdapter = new TracksArrayAdapter(this, spotifyService);
+        final TracksArrayAdapter tracksArrayAdapter = new TracksArrayAdapter(this);
         mTracks.setAdapter(tracksArrayAdapter);
 
         spotifyService.getArtistTopTrack(artistID, ImmutableMap.<String, Object>of("country", "de"), new Callback<Tracks>() {
@@ -70,7 +68,7 @@ public class ArtistDetails extends ActionBarActivity {
             @Override
             public void failure(RetrofitError error) {
                 Log.v("Spotify","Could not load top tracks");
-                Toast.makeText(getApplicationContext(), "No tracks found.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Connection error", Toast.LENGTH_SHORT).show();
             }
         });
 

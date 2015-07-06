@@ -1,31 +1,21 @@
 package de.kkrehl.udacity.spotifystreamer;
 
 import android.content.Intent;
-import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.support.v7.internal.widget.AdapterViewCompat;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Album;
 import kaaes.spotify.webapi.android.models.Artist;
-import kaaes.spotify.webapi.android.models.Artists;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -33,25 +23,17 @@ import retrofit.client.Response;
 
 
 public class MainActivity extends ActionBarActivity {
-    ListView mArtists;
-    EditText mSearchField;
     final static String ARTIST_ID = "artist_id";
     final static String ARTIST_NAME = "artist_name";
     final static String SEARCH_TERM = "SearchTerm";
-    final static String PREFERENCES = "preferences";
     static ArtistsArrayAdapter artistArrayAdapter;
-
+    ListView mArtists;
+    EditText mSearchField;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putString(SEARCH_TERM, mSearchField.getText().toString());
         super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onPause() {
-        getSharedPreferences(PREFERENCES,0).edit().putString(SEARCH_TERM,mSearchField.getText().toString());
-        super.onPause();
     }
 
     @Override
@@ -63,12 +45,10 @@ public class MainActivity extends ActionBarActivity {
         mSearchField = (EditText) findViewById(R.id.search_text);
         if (savedInstanceState != null) {
             mSearchField.setText(savedInstanceState.getString(SEARCH_TERM));
-        } else {
-            mSearchField.setText(getSharedPreferences(PREFERENCES,0).getString(SEARCH_TERM,""));
         }
         final SpotifyService spotify = api.getService();
 
-        artistArrayAdapter = new ArtistsArrayAdapter(this,spotify);
+        artistArrayAdapter = new ArtistsArrayAdapter(this);
         mArtists.setAdapter(artistArrayAdapter);
 
         mSearchField.addTextChangedListener(new TextWatcher() {
@@ -95,7 +75,7 @@ public class MainActivity extends ActionBarActivity {
 
                     @Override
                     public void failure(RetrofitError error) {
-                        Toast.makeText(getApplicationContext(),"No artists found.",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Connection error.", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
